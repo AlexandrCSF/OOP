@@ -63,11 +63,14 @@ public class Main {
                     break;
                 case "getCards":
                     for (int i = 0; i < game.getPlayers().size(); i++) {
-                        System.out.println("Player " + (i + 1) + " Cards :" + Arrays.toString(new List[]{Arrays.asList(game.getPlayers().get(i).getCards())}) +
-                                "; Fold:" + game.getPlayers().get(i).isFold + "; Bet: " + game.getPlayers().get(i).getBet() +
-                        ";Bank: " + game.getPlayers().get(i).getBank());
+                        System.out.print("Player " + (i + 1) + " " +
+                                Ranking.cardsToString(game.getPlayers().get(i).getCards()) +
+                                ";Fold:" + game.getPlayers().get(i).isFold + " " +
+                                ";Bet: " + game.getPlayers().get(i).getBet() + " " +
+                                ";Bank: " + game.getPlayers().get(i).getBank());
+                        System.out.println();
                     }
-                    System.out.println("Table Cards: " + Arrays.toString(new List[]{game.getTableCards()}));
+                    System.out.println("Table " + Ranking.cardsToString(game.getTableCards()));
                     break;
             }
         }
@@ -83,8 +86,8 @@ public class Main {
             }
         }
 
-        System.out.println(Arrays.toString(new String[]{"Table cards: " + Arrays.toString(new List[]{game.getTableCards()})}));
-        System.out.println(Arrays.toString(new String[]{"Player " + (winnerIndex + 1) + " Cards :" + Arrays.toString(Arrays.stream(winner.getCards()).toArray()) + " "
+        System.out.println("Table cards: " + Ranking.cardsToString(game.getTableCards()));
+        System.out.println(Arrays.toString(new String[]{"Player " + (winnerIndex + 1) + " " + Ranking.cardsToString(game.getPlayers().get(winnerIndex).getCards()) + " "
                 + game.getPlayers().get(winnerIndex).getRankingEnum() + "; Bet: " + game.getPlayers().get(winnerIndex).getBet() +
                 "; Bank: " + game.getPlayers().get(winnerIndex).getBank()}));
     }

@@ -8,6 +8,9 @@ import java.util.List;
 
 public class GameTexasHoldem implements Serializable {
 
+	private int callBet = 0;
+
+    private int Bank = 0;
 
 	private int bigBlind;
 
@@ -15,9 +18,10 @@ public class GameTexasHoldem implements Serializable {
 
 	private ArrayList<Player> players;
 
-	private List<Card> tableCards;
+	private ArrayList<Card> tableCards;
 
 	public void newGame(Deck deck, Player dealer, ArrayList<Player> players,int bigBlind) {
+		this.callBet = bigBlind;
 		this.bigBlind = bigBlind;
 		this.deck = deck;
 		tableCards = new ArrayList<Card>();
@@ -25,7 +29,8 @@ public class GameTexasHoldem implements Serializable {
 		this.players.add(dealer);
 		this.players.addAll(players);
 	}
-	public void newGame(Deck deck, Player dealer,ArrayList<Player> players,int bigBlind,ArrayList<Integer> banks){
+	public void newGame(Deck deck, Player dealer, ArrayList<Player> players, int bigBlind, ArrayList<Integer> banks){
+		this.Bank = 0;
 		assert banks.size() == players.size();
 		this.bigBlind = bigBlind;
 		this.deck = deck;
@@ -36,6 +41,30 @@ public class GameTexasHoldem implements Serializable {
 		for (int i = 1; i < this.players.size(); i++) {
 			this.players.get(i).setBank(banks.get(i - 1));
 		}
+	}
+
+	public int getBigBlind() {
+		return bigBlind;
+	}
+
+	public void setBigBlind(int bigBlind) {
+		this.bigBlind = bigBlind;
+	}
+
+	public int getBank() {
+		return Bank;
+	}
+
+	public void setBank(int bank) {
+		Bank = bank;
+	}
+
+	public int getCallBet() {
+		return callBet;
+	}
+
+	public void setCallBet(int callBet) {
+		this.callBet = callBet;
 	}
 
 	public void removePlayer(Player player) {
@@ -57,6 +86,9 @@ public class GameTexasHoldem implements Serializable {
 			player.getCards()[1] = deck.pop();
 		}
 		checkPlayersRanking();
+		for (Player player : players) {
+			setBank(getBank() + player.getBet());
+		}
 	}
 	public void callFlop() {
 		deck.pop();
@@ -65,7 +97,11 @@ public class GameTexasHoldem implements Serializable {
 		tableCards.add(deck.pop());
 		checkPlayersRanking();
 		for(Player player : players){
-			BetUtil.calculateBet(player);
+			BetUtil.calculateBet(player,this);
+		}
+		setBank(0);
+		for (Player player : players) {
+			setBank(getBank() + player.getBet());
 		}
 	}
 
@@ -74,7 +110,11 @@ public class GameTexasHoldem implements Serializable {
 		tableCards.add(deck.pop());
 		checkPlayersRanking();
 		for(Player player : players){
-			BetUtil.calculateBet(player);
+			BetUtil.calculateBet(player,this);
+		}
+		setBank(0);
+		for (Player player : players) {
+			setBank(getBank() + player.getBet());
 		}
 	}
 
@@ -83,7 +123,11 @@ public class GameTexasHoldem implements Serializable {
 		tableCards.add(deck.pop());
 		checkPlayersRanking();
 		for(Player player : players){
-			BetUtil.calculateBet(player);
+			BetUtil.calculateBet(player,this);
+		}
+		setBank(0);
+		for (Player player : players) {
+			setBank(getBank() + player.getBet());
 		}
 	}
 
@@ -91,13 +135,13 @@ public class GameTexasHoldem implements Serializable {
 		checkPlayersRanking();
 		List<Player> winnerList = new ArrayList<Player>();
 		Player winner = players.get(0);
-		int winnerRank = RankingUtil.getRankingToInt(winner);
+		int winnerRank = Ranking.getRankingToInt(winner);
 		winnerList.add(winner);
 		for (int i = 1; i < players.size(); i++) {
 			if(players.get(i).isFold)
 				continue;
 			Player player = players.get(i);
-			int playerRank = RankingUtil.getRankingToInt(player);
+			int playerRank = Ranking.getRankingToInt(player);
 			if (winnerRank == playerRank) {
 				Player highHandPlayer = checkHighSequence(winner, player);
 				if (highHandPlayer == null) {
@@ -115,20 +159,14 @@ public class GameTexasHoldem implements Serializable {
 				winnerList.clear();
 				winnerList.add(winner);
 			}
-			winnerRank = RankingUtil.getRankingToInt(winner);
+			winnerRank = Ranking.getRankingToInt(winner);
 		}
 		return winnerList;
 	}
 
 	private Player checkHighSequence(Player player1, Player player2) {
-		if (player1.isFold){
-			return player2;
-		}
-		if(player2.isFold){
-			return player1;
-		}
-		Integer player1Rank = sumRankingList(player1);
-		Integer player2Rank = sumRankingList(player2);
+		int player1Rank = player1.getRankingEnum().ordinal();
+		int player2Rank = player2.getRankingEnum().ordinal();
 		if (player1Rank > player2Rank) {
 			return player1;
 		} else if (player1Rank < player2Rank) {
@@ -141,10 +179,8 @@ public class GameTexasHoldem implements Serializable {
 		Player winner = compareHighCard(player1, player1.getHighCard(),
 				player2, player2.getHighCard());
 		if (winner == null) {
-			Card player1Card = RankingUtil.getHighCard(player1,
-					Collections.EMPTY_LIST);
-			Card player2Card = RankingUtil.getHighCard(player2,
-					Collections.EMPTY_LIST);
+			Card player1Card = Ranking.getHighCard(player1.getCards());
+			Card player2Card = Ranking.getHighCard(player2.getCards());
 			winner = compareHighCard(player1, player1Card, player2, player2Card);
 			if (winner != null) {
 				player1.setHighCard(player1Card);
@@ -173,10 +209,6 @@ public class GameTexasHoldem implements Serializable {
 		}
 		return null;
 	}
-
-	/*
-	 * TODO This method must be moved to RankingUtil
-	 */
 	private Card getSecondHighCard(Player player, Card card) {
 		if (player.getCards()[0].equals(card)) {
 			return player.getCards()[1];
@@ -184,13 +216,10 @@ public class GameTexasHoldem implements Serializable {
 		return player.getCards()[0];
 	}
 
-	public List<Card> getTableCards() {
+	public ArrayList<Card> getTableCards() {
 		return tableCards;
 	}
 
-	/*
-	 * TODO This method must be moved to RankingUtil
-	 */
 	private Integer sumRankingList(Player player) {
 		Integer sum = 0;
 		for (Card card : player.getRankingList()) {
@@ -204,7 +233,8 @@ public class GameTexasHoldem implements Serializable {
 			if(player.isFold){
 				return;
 			}
-			RankingUtil.checkRanking(player, tableCards);
+			player.setHighCard(Ranking.getHighCard(player.getCards()));
+			player.setRankingEnum(Ranking.checkRanking(Ranking.arrayToList(player.getCards()), tableCards));
 		}
 	}
 }

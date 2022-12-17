@@ -1,43 +1,49 @@
 package sc.vsu.Kotov;
 
-import java.util.ArrayList;
-
 public class BetUtil {
-    public static void calculateBet(Player player){
+    public static void calculateBet(Player player,GameTexasHoldem game){
         if(player.isFold)
             return;
         switch (player.getRankingEnum()){
             case ROYAL_FLUSH:
             case STRAIGHT_FLUSH:
             case FOUR_OF_A_KIND:
-                player.setBet(player.getBank());
+                player.setBet(Math.max(game.getCallBet(), player.getBank()));
+                game.setCallBet(Math.max(game.getCallBet(), player.getBet()));
                 return;
             case FULL_HOUSE:
-                player.setBet((player.getBank()/3) * 2);
+                player.setBet(Math.max(game.getCallBet(), (player.getBank() / 3) * 2));
+                game.setCallBet(Math.max(game.getCallBet(), player.getBet()));
                 return;
             case FLUSH:
             case STRAIGHT:
-                player.setBet((player.getBank() / 4) * 3);
+                player.setBet(Math.max(game.getCallBet(), (player.getBank() / 4) * 3));
+                game.setCallBet(Math.max(game.getCallBet(), player.getBet()));
                 return;
             case THREE_OF_A_KIND:
-                player.setBet((player.getBank() /5) * 2);
-                return;
             case TWO_PAIR:
             case ONE_PAIR:
-                player.setBet((player.getBank() / 10));
+                player.setBet(game.getCallBet());
                 return;
             case HIGH_CARD:
-                if(player.getHighCard().getRank().equals(CardRankEnum.ACE) ||
-                        player.getHighCard().getRank().equals(CardRankEnum.KING) ||
-                        player.getHighCard().getRank().equals(CardRankEnum.QUEEN)){
-                    player.setBet((player.getBank() / 10));}
-                else  player.isFold = true;
+                if(player.getHighCard().getRank().equals(CardRank.ACE) ||
+                        player.getHighCard().getRank().equals(CardRank.KING) ||
+                        player.getHighCard().getRank().equals(CardRank.QUEEN)){
+                    if(game.getCallBet() < player.getBank() / 5)
+                    player.setBet(game.getCallBet());
+                    else player.isFold = true;
+                }
+                else
+                    if(game.getCallBet() == game.getBigBlind())
+                        player.setBet(game.getCallBet());
+                    else player.isFold = true;
                 }
         }
+
         public static void calculateBank(GameTexasHoldem game){
             for(Player player: game.getPlayers()){
                 if(game.getWinner().contains(player)){
-                    player.setBank(player.getBank() + player.getBet());
+                    player.setBank(player.getBank() + game.getBank());
                 } else player.setBank(player.getBank() - player.getBet());
 
             }

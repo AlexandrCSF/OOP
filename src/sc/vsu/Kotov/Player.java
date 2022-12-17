@@ -7,6 +7,7 @@ import java.util.List;
 public class Player implements Serializable {
 
 	public boolean isFold = false;
+
 	private int bank;
 
 	private int bet;
@@ -69,5 +70,8 @@ public class Player implements Serializable {
 
 	public Player() {
 		this.bank = 10000;
+	}
+	public void call(GameTexasHoldem game){
+		this.setBet(game.getCallBet());
 	}
 }

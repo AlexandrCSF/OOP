@@ -1,35 +1,31 @@
 package sc.vsu.Kotov;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 
 public class Deck implements Serializable {
 
 	private List<Card> cards;
-	private final Random random;
+
 
 	public Deck() {
-		this(new Random());
-	}
-
-	public Deck(Random random) {
-		this.random = random;
 		createDeck();
 	}
 
 	private void createDeck() {
-		cards = new ArrayList<Card>();
-		for (CardSuitEnum suit : CardSuitEnum.values()) {
-			for (CardRankEnum rank : CardRankEnum.values()) {
+		cards = new ArrayList<>();
+		for (CardSuit suit : CardSuit.values()) {
+			for (CardRank rank : CardRank.values()) {
 				cards.add(new Card(suit, rank));
 			}
 		}
+		Collections.shuffle(cards);
 	}
 
 	public Card pop() {
-		return cards.remove(random.nextInt(cards.size()));
+		Card card = cards.get(0);
+		cards.remove(0);
+		return card;
 	}
 }

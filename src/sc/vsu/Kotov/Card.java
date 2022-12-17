@@ -5,19 +5,19 @@ import java.io.Serializable;
 
 public class Card implements Serializable {
 
-	private final CardSuitEnum suit;
-	private final CardRankEnum rank;
+	private final CardSuit suit;
+	private final CardRank rank;
 
-	public Card(CardSuitEnum suit, CardRankEnum rank) {
+	public Card(CardSuit suit, CardRank rank) {
 		this.suit = suit;
 		this.rank = rank;
 	}
 
-	public CardSuitEnum getSuit() {
+	public CardSuit getSuit() {
 		return suit;
 	}
 
-	public CardRankEnum getRank() {
+	public CardRank getRank() {
 		return rank;
 	}
 

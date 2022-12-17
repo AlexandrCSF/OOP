@@ -1,6 +1,6 @@
 package sc.vsu.Kotov;
 
-public enum CardRankEnum {
+public enum CardRank {
 	CARD_2,
 	CARD_3,
 	CARD_4,

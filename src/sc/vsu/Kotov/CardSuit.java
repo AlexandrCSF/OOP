@@ -1,6 +1,6 @@
 package sc.vsu.Kotov;
 
-public enum CardSuitEnum {
+public enum CardSuit {
 	CLUBS,
 	DIAMONDS,
 	HEARTS,
