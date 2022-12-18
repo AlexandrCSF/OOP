@@ -1,6 +1,7 @@
 package sc.vsu.Kotov;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -18,7 +19,6 @@ public class Player implements Serializable {
 
 	private List<Card> rankingList = null;
 
-	private Card highCard = null;
 
 	public int getBank() {
 		return bank;
@@ -28,20 +28,12 @@ public class Player implements Serializable {
 		this.bank = bank;
 	}
 
-	public Card getHighCard() {
-		return highCard;
-	}
-
 	public int getBet() {
 		return bet;
 	}
 
 	public void setBet(int bet) {
 		this.bet = bet;
-	}
-
-	public void setHighCard(Card highCard) {
-		this.highCard = highCard;
 	}
 
 	public RankingEnum getRankingEnum() {
@@ -74,4 +66,16 @@ public class Player implements Serializable {
 	public void call(GameTexasHoldem game){
 		this.setBet(game.getCallBet());
 	}
+	public Card getHighCard(){
+		int highestRank = CardRank.CARD_2.ordinal();
+		Card result = null;
+		for (Card card : cards) {
+			if (card.getRankToInt() >= highestRank) {
+				highestRank = card.getRankToInt();
+				result = card;
+			}
+		}
+		return result;
+	}
 }
+

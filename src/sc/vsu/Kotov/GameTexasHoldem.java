@@ -85,7 +85,6 @@ public class GameTexasHoldem implements Serializable {
 			player.getCards()[0] = deck.pop();
 			player.getCards()[1] = deck.pop();
 		}
-		checkPlayersRanking();
 		for (Player player : players) {
 			setBank(getBank() + player.getBet());
 		}
@@ -179,21 +178,14 @@ public class GameTexasHoldem implements Serializable {
 		Player winner = compareHighCard(player1, player1.getHighCard(),
 				player2, player2.getHighCard());
 		if (winner == null) {
-			Card player1Card = Ranking.getHighCard(player1.getCards());
-			Card player2Card = Ranking.getHighCard(player2.getCards());
+			Card player1Card = player1.getHighCard();
+			Card player2Card = player2.getHighCard();
 			winner = compareHighCard(player1, player1Card, player2, player2Card);
-			if (winner != null) {
-				player1.setHighCard(player1Card);
-				player2.setHighCard(player2Card);
-			} else if (winner == null) {
-				player1Card = getSecondHighCard(player1, player1Card);
+			 if (winner == null) {
+				 player1Card = getSecondHighCard(player1, player1Card);
 				player2Card = getSecondHighCard(player2, player2Card);
 				winner = compareHighCard(player1, player1Card, player2,
 						player2Card);
-				if (winner != null) {
-					player1.setHighCard(player1Card);
-					player2.setHighCard(player2Card);
-				}
 			}
 		}
 		return winner;
@@ -220,21 +212,13 @@ public class GameTexasHoldem implements Serializable {
 		return tableCards;
 	}
 
-	private Integer sumRankingList(Player player) {
-		Integer sum = 0;
-		for (Card card : player.getRankingList()) {
-			sum += card.getRankToInt();
-		}
-		return sum;
-	}
-
 	public void checkPlayersRanking() {
 		for (Player player : players) {
 			if(player.isFold){
 				return;
 			}
-			player.setHighCard(Ranking.getHighCard(player.getCards()));
-			player.setRankingEnum(Ranking.checkRanking(Ranking.arrayToList(player.getCards()), tableCards));
+			player.setRankingList(Ranking.getWinningSequence(Ranking.arrayToList(player.getCards()), tableCards));
+			player.setRankingEnum(Ranking.checkRanking(Ranking.arrayToList(player.getCards()),tableCards));
 		}
 	}
 }
