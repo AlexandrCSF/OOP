@@ -1,11 +1,9 @@
 package sc.vsu.Kotov.combinations.Tests;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import sc.vsu.Kotov.Card;
 import sc.vsu.Kotov.CardRank;
 import sc.vsu.Kotov.CardSuit;
-import sc.vsu.Kotov.Ranking;
 import sc.vsu.Kotov.combinations.StraightCombination;
 
 import java.util.ArrayList;

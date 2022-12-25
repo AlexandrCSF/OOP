@@ -3,11 +3,12 @@ package sc.vsu.Kotov;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class GameTexasHoldem implements Serializable {
 
+	Ranking ranking = new Ranking();
+	BetUtil betCalculator =new BetUtil();
 	private int callBet = 0;
 
     private int Bank = 0;
@@ -20,27 +21,21 @@ public class GameTexasHoldem implements Serializable {
 
 	private ArrayList<Card> tableCards;
 
-	public void newGame(Deck deck, Player dealer, ArrayList<Player> players,int bigBlind) {
+	public void newGame(int playersAmount,int bigBlind) {
+		this.players = new ArrayList<>();
+		this.tableCards = new ArrayList<Card>();
+		for (int i = 0; i < playersAmount; i++) {
+			players.add(new Player());
+		}
 		this.callBet = bigBlind;
 		this.bigBlind = bigBlind;
-		this.deck = deck;
-		tableCards = new ArrayList<Card>();
-		this.players = new ArrayList<Player>();
-		this.players.add(dealer);
-		this.players.addAll(players);
+		this.deck = new Deck();
 	}
-	public void newGame(Deck deck, Player dealer, ArrayList<Player> players, int bigBlind, ArrayList<Integer> banks){
+	public void newGame(){
 		this.Bank = 0;
-		assert banks.size() == players.size();
-		this.bigBlind = bigBlind;
-		this.deck = deck;
-		tableCards = new ArrayList<Card>();
-		this.players = new ArrayList<Player>();
-		this.players.add(dealer);
-		this.players.addAll(players);
-		for (int i = 1; i < this.players.size(); i++) {
-			this.players.get(i).setBank(banks.get(i - 1));
-		}
+		this.callBet = 0;
+		this.deck = new Deck();
+		tableCards.clear();
 	}
 
 	public int getBigBlind() {
@@ -134,13 +129,13 @@ public class GameTexasHoldem implements Serializable {
 		checkPlayersRanking();
 		List<Player> winnerList = new ArrayList<Player>();
 		Player winner = players.get(0);
-		int winnerRank = Ranking.getRankingToInt(winner);
+		int winnerRank = winner.getRankingToInt();
 		winnerList.add(winner);
 		for (int i = 1; i < players.size(); i++) {
 			if(players.get(i).isFold)
 				continue;
 			Player player = players.get(i);
-			int playerRank = Ranking.getRankingToInt(player);
+			int playerRank = player.getRankingToInt();
 			if (winnerRank == playerRank) {
 				Player highHandPlayer = checkHighSequence(winner, player);
 				if (highHandPlayer == null) {
@@ -158,7 +153,7 @@ public class GameTexasHoldem implements Serializable {
 				winnerList.clear();
 				winnerList.add(winner);
 			}
-			winnerRank = Ranking.getRankingToInt(winner);
+			winnerRank = winner.getRankingToInt();
 		}
 		return winnerList;
 	}
@@ -195,8 +190,7 @@ public class GameTexasHoldem implements Serializable {
 								   Player player2, Card player2HighCard) {
 		if (player1HighCard.getRankToInt() > player2HighCard.getRankToInt()) {
 			return player1;
-		} else if (player1HighCard.getRankToInt() < player2HighCard
-				.getRankToInt()) {
+		} else if (player1HighCard.getRankToInt() < player2HighCard.getRankToInt()) {
 			return player2;
 		}
 		return null;
@@ -217,8 +211,35 @@ public class GameTexasHoldem implements Serializable {
 			if(player.isFold){
 				return;
 			}
-			player.setRankingList(Ranking.getWinningSequence(Ranking.arrayToList(player.getCards()), tableCards));
-			player.setRankingEnum(Ranking.checkRanking(Ranking.arrayToList(player.getCards()),tableCards));
+			player.setRankingList(ranking.getWinningSequence(GameUtils.arrayToList(player.getCards()), tableCards));
+			player.setRankingEnum(ranking.checkRanking(GameUtils.arrayToList(player.getCards()),tableCards));
 		}
+	}
+
+	public void printPlayers(){
+		for (int i = 0; i < getPlayers().size(); i++) {
+			System.out.print("Player " + (i + 1) + " " +
+					GameUtils.cardsToString(getPlayers().get(i).getCards()) +
+					";Fold:" + getPlayers().get(i).isFold + " " +
+					";Bet: " + getPlayers().get(i).getBet() + " " +
+					";Bank: " + getPlayers().get(i).getBank() + " " +
+					"Rank: " + getPlayers().get(i).getRankingEnum());
+			System.out.println();
+		}
+	}
+	public void printWinner() {
+		Player winner = getWinner().get(0);
+		int winnerIndex = 0;
+		BetUtil.calculateBank(this);
+		for (int i = 0; i < getPlayers().size(); i++) {
+			if (Arrays.equals(winner.getCards(), getPlayers().get(i).getCards())) {
+				winnerIndex = i;
+			}
+		}
+
+		System.out.println("Table cards: " + GameUtils.cardsToString(getTableCards()));
+		System.out.println(Arrays.toString(new String[]{"Player " + (winnerIndex + 1) + " " + GameUtils.cardsToString(getPlayers().get(winnerIndex).getCards()) + " "
+				+ getPlayers().get(winnerIndex).getRankingEnum() + "; Bet: " + getPlayers().get(winnerIndex).getBet() +
+				"; Bank: " + getPlayers().get(winnerIndex).getBank()}));
 	}
 }

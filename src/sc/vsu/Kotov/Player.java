@@ -19,6 +19,9 @@ public class Player implements Serializable {
 
 	private List<Card> rankingList = null;
 
+	public int getRankingToInt(){
+		return getRankingEnum().ordinal();
+	}
 
 	public int getBank() {
 		return bank;
